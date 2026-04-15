@@ -1,0 +1,7 @@
+@use 'mixins.breakpoints.scss' as *;
+@use "sass:map";
+
+:export {
+  keys: map.keys($breakpoints);
+  values: map.values($breakpoints);
+}

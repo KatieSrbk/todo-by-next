@@ -1,0 +1,50 @@
+.todoList {
+  border-radius: 5px;
+  background: var(--color-white);
+}
+
+.todoItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 20px;
+  gap: 15px;
+}
+
+.todoWrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.todoCheckbox {
+  width: 25px;
+  height: 25px;
+  border: 2px solid var(--color-white);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+
+  &:hover {
+    border-color: var(--color-blue-60);
+    transform: scale(1.1);
+  }
+}
+
+.todoText {
+  font-size: 20px;
+  color: var(--color-black);
+  font-weight: 500;
+}
+
+.deleteButton {
+  padding: 5px 12px;
+  background: var(--color-red-30);
+  color: var(--color-white);
+  border-radius: 5px;
+  font-size: 13px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--color-red-20);
+    transform: scale(1.05);
+  }
+}

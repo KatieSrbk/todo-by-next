@@ -1,0 +1,43 @@
+.addSection {
+  display: flex;
+  gap: 10px;
+}
+
+.addInput {
+  width: 100%;
+  padding: 7px 20px;
+  border-radius: 5px;
+  font-size: 17px;
+  transition: all 0.3s ease;
+  outline: none;
+
+  &:focus {
+    transform: translateY(-2px);
+  }
+
+  &::placeholder {
+    color: var(--color-grey-90);
+    font-style: italic;
+  }
+}
+
+.addButton {
+  padding: 7px 20px;
+  background: var(--color-green-50);
+  color: var(--color-white);
+  border-radius: 5px;
+  font-size: 17px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+
+  &:hover {
+    background: var(--color-green-40);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(var(--color-black-rgb), 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
