@@ -1,0 +1,52 @@
+@use 'mixins.scss' as *;
+@use 'variables.scss' as *;
+
+html {
+  font-size: 10px;
+  min-width: 320px;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  color: var(--color-text-dark-primary);
+  background: var(--color-peach-10);
+  font-style: normal;
+  font-family: var(--font-primary);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+h1, h2, h3, h4, h5, h6, p, a {
+  word-wrap: break-word;
+}
+
+// этот код закомментирован до определения цветовой темы
+// @media (prefers-color-scheme: dark) {
+//   html {
+//     color-scheme: dark;
+//   }
+// }

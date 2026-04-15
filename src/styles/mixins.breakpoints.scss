@@ -1,0 +1,94 @@
+@use "sass:map";
+
+// Desktop grid: width = 1920, columns = 12, gutter = 20, margin = 52
+// Tablet grid: width = 768, columns = 6, gutter = 12, margin = 28
+// Mobile grid: width = 375, columns = 6, gutter = 8, margin = 12
+
+$breakpoints: (
+  xs: 360px,
+  sm: 760px,
+  md: 920px,
+  lg: 1024px,
+  xl: 1440px,
+  xll: 1600px,
+  xxl: 1920px,
+);
+
+@mixin xs {
+  @media (max-width: (map.get($breakpoints, "xs") - 1)) {
+    @content;
+  }
+}
+
+@mixin sm {
+  @media (max-width: (map.get($breakpoints, "sm") - 1)) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (max-width: (map.get($breakpoints, "md") - 1)) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (max-width: (map.get($breakpoints, "lg") - 1)) {
+    @content;
+  }
+}
+
+@mixin min-lg {
+  @media (min-width: (map.get($breakpoints, "lg"))) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media (max-width: (map.get($breakpoints, "xl") - 1)) {
+    @content;
+  }
+}
+
+@mixin min-xl {
+  @media (min-width: (map.get($breakpoints, "xl") - 1)) {
+    @content;
+  }
+}
+
+@mixin xll {
+  @media (max-width: (map.get($breakpoints, "xll") - 1)) {
+    @content;
+  }
+}
+
+@mixin xxl {
+  @media (max-width: (map.get($breakpoints, "xxl") - 1)) {
+    @content;
+  }
+}
+
+@mixin breakpoint($bp: 0) {
+  @media (max-width: $bp) {
+    @content;
+  }
+}
+
+@mixin breakpoints($bp1, $bp2) {
+  @media (min-width: map.get($breakpoints, $bp1)) and (max-width: (map.get($breakpoints, $bp2) - 1)) {
+    @content;
+  }
+}
+
+// Алиасы для удобства
+@mixin mobile {
+  @include sm {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @include md {
+    @content;
+  }
+}

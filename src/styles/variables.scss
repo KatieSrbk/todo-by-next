@@ -1,0 +1,38 @@
+@use 'mixins.scss' as *;
+
+:root {
+  // Colors
+  --color-black-rgb: #{HexToRGB(#000000)};
+  --color-black: #000000;
+
+  --color-white-rgb: #{HexToRGB(#ffffff)};
+  --color-white: #ffffff;
+
+  --color-red-30: #f44336;
+  --color-red-20: #d32f2f;
+  --color-red-10: #f6e1df;
+  --color-grey-00: #e0e0e0;
+  --color-grey-90: #999;
+  --color-grey-60: #666;
+  --color-grey-50: #555;
+  --color-green-50: #4caf50;
+  --color-green-40: #45a049;
+  --color-blue-70: #7688d7;
+  --color-blue-60: #667eea;
+
+  // Transition durations
+  --transition-duration: 0.2s;
+  --transition-duration-x1-5: 0.3s;
+  --transition-duration-x2: 0.4s;
+  --transition-duration-x3: 0.6s;
+  --transition-duration-x4: 0.8s;
+  --transition-duration-x5: 1s;
+  --transition-duration-x6: 1.2s;
+  --transition-duration-x7: 1.4s;
+  --transition-duration-x8: 1.6s;
+
+  --transition-function: cubic-bezier(0.19, 0.13, 0.02, 0.99);
+
+  // Sizes
+  --header-height: 64px;
+}
