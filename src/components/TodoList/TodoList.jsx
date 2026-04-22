@@ -43,12 +43,17 @@ const TodoList = () => {
     }
   };
 
+  const deleteTodo = (id) => {
+    const filteredTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(filteredTodos);
+  };
+
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
       <AddSection addTodo={addTodo} />
       <FilterGroup />
-      <TodosItems todos={todos} />
+      <TodosItems todos={todos} deleteTodo={deleteTodo} />
     </div>
   );
 };
