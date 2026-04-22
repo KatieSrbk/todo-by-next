@@ -1,6 +1,6 @@
 import styles from './styles.module.scss';
 
-const TodosItems = ({ todos }) => {
+const TodosItems = ({ todos, deleteTodo }) => {
   return (
     <div className={styles.todoList}>
       {todos.map((item, index) => {
@@ -10,7 +10,12 @@ const TodosItems = ({ todos }) => {
               <input className={styles.todoCheckbox} type='checkbox' />
               <span className={styles.todoText}>{item.text}</span>
             </div>
-            <button className={styles.deleteButton}>Удалить</button>
+            <button
+              className={styles.deleteButton}
+              onClick={() => deleteTodo(item.id)}
+            >
+              Удалить
+            </button>
           </div>
         );
       })}
