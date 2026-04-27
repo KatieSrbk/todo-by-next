@@ -48,12 +48,21 @@ const TodoList = () => {
     setTodos(filteredTodos);
   };
 
+  const editTodo = (id, newText) => {
+    if (newText.trim()) {
+      const updatedTodos = todos.map((todo) =>
+        todo.id === id ? { ...todo, text: newText.trim() } : todo
+      );
+      setTodos(updatedTodos);
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
       <AddSection addTodo={addTodo} />
       <FilterGroup />
-      <TodosItems todos={todos} deleteTodo={deleteTodo} />
+      <TodosItems todos={todos} deleteTodo={deleteTodo} editTodo={editTodo} />
     </div>
   );
 };
