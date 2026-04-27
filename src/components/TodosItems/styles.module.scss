@@ -8,11 +8,14 @@
   justify-content: space-between;
   padding: 5px 20px;
   gap: 15px;
+  align-items: flex-start;
 }
 
 .todoWrapper {
   display: flex;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 
 .todoCheckbox {
@@ -22,6 +25,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 50%;
+  flex-shrink: 0;
 
   &:hover {
     border-color: var(--color-blue-60);
@@ -33,6 +37,66 @@
   font-size: 20px;
   color: var(--color-black);
   font-weight: 500;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.editWrapper {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.editInput {
+  flex: 1;
+  padding: 7px 12px;
+  border: 2px solid var(--color-green-50);
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  min-width: 0;
+}
+
+.editButtons {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.saveButton,
+.cancelButton {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.saveButton {
+  background-color: var(--color-green-50);
+  color: var(--color-white);
+
+  &:hover {
+    background-color: var(--color-green-40);
+  }
+}
+
+.cancelButton {
+  background-color: var(--color-red-30);
+  color: var(--color-white);
+
+  &:hover {
+    background-color: var(--color-red-20);
+  }
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .deleteButton {
@@ -45,6 +109,20 @@
 
   &:hover {
     background: var(--color-red-20);
+    transform: scale(1.05);
+  }
+}
+
+.editButton {
+  padding: 5px 12px;
+  background: var(--color-yellow-40);
+  color: var(--color-white);
+  border-radius: 5px;
+  font-size: 13px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--color-yellow-10);
     transform: scale(1.05);
   }
 }
