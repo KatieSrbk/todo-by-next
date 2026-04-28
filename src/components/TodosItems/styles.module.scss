@@ -41,6 +41,12 @@
   flex: 1;
   min-width: 0;
   line-height: 1.4;
+
+  &.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+    color: var(--color-gray-50);
+  }
 }
 
 .editWrapper {

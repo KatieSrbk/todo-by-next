@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import classNames from 'classnames';
 import styles from './styles.module.scss';
 
-const TodosItems = ({ todos, deleteTodo, editTodo }) => {
+const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const inputRef = useRef(null);
@@ -69,8 +70,19 @@ const TodosItems = ({ todos, deleteTodo, editTodo }) => {
             ) : (
               <>
                 <div className={styles.todoWrapper}>
-                  <input className={styles.todoCheckbox} type='checkbox' />
-                  <span className={styles.todoText}>{item.text}</span>
+                  <input
+                    className={styles.todoCheckbox}
+                    type='checkbox'
+                    checked={item.completed}
+                    onChange={() => toggleComplete(item.id)}
+                  />
+                  <span
+                    className={classNames(styles.todoText, {
+                      [styles.completed]: item.completed,
+                    })}
+                  >
+                    {item.text}
+                  </span>
                 </div>
                 <div className={styles.actionButtons}>
                   <button
