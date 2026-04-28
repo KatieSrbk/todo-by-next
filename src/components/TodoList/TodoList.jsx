@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AddSection from '../AddSection';
 import FilterGroup from '../FilterGroup';
 import TodosItems from '../TodosItems';
@@ -29,7 +29,13 @@ const TODOS_MOCK = [
 ];
 
 const TodoList = () => {
-  const [todos, setTodos] = useState(TODOS_MOCK);
+  const [todos, setTodos] = useState(() => {
+    const savedTodos = localStorage.getItem('todos');
+    if (savedTodos) {
+      return JSON.parse(savedTodos);
+    }
+    return [];
+  });
 
   const addTodo = (text) => {
     if (text.trim()) {
@@ -57,12 +63,28 @@ const TodoList = () => {
     }
   };
 
+  const toggleComplete = (id) => {
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    setTodos(updatedTodos);
+  };
+
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
       <AddSection addTodo={addTodo} />
       <FilterGroup />
-      <TodosItems todos={todos} deleteTodo={deleteTodo} editTodo={editTodo} />
+      <TodosItems
+        todos={todos}
+        deleteTodo={deleteTodo}
+        editTodo={editTodo}
+        toggleComplete={toggleComplete}
+      />
     </div>
   );
 };
