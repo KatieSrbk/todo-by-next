@@ -36,6 +36,9 @@ const TodoList = () => {
     }
     return [];
   });
+  const [sortType, setSortType] = useState('new');
+  const [filterType, setFilterType] = useState('all');
+  const [processedTodos, setProcessedTodos] = useState([]);
 
   const addTodo = (text) => {
     if (text.trim()) {
@@ -74,13 +77,36 @@ const TodoList = () => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
+  useEffect(() => {
+    let processed = todos.filter((todo) => {
+      if (filterType === 'active') return !todo.completed;
+      if (filterType === 'completed') return todo.completed;
+      return true;
+    });
+
+    processed.sort((a, b) => {
+      if (sortType === 'new') {
+        return b.createdAt - a.createdAt;
+      } else {
+        return a.createdAt - b.createdAt;
+      }
+    });
+
+    setProcessedTodos(processed);
+  }, [sortType, filterType]);
+
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
       <AddSection addTodo={addTodo} />
-      <FilterGroup />
+      <FilterGroup
+        sortType={sortType}
+        setSortType={setSortType}
+        filterType={filterType}
+        setFilterType={setFilterType}
+      />
       <TodosItems
-        todos={todos}
+        todos={processedTodos}
         deleteTodo={deleteTodo}
         editTodo={editTodo}
         toggleComplete={toggleComplete}
