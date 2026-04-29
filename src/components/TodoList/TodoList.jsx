@@ -73,6 +73,17 @@ const TodoList = () => {
     setTodos(updatedTodos);
   };
 
+  const deleteAllTodos = () => {
+    if (todos.length === 0) return;
+
+    const confirmed = window.confirm(
+      'Вы уверены, что хотите удалить ВСЕ задачи? Это действие нельзя отменить.'
+    );
+    if (confirmed) {
+      setTodos([]);
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
@@ -93,7 +104,7 @@ const TodoList = () => {
     });
 
     setProcessedTodos(processed);
-  }, [sortType, filterType]);
+  }, [todos, sortType, filterType]);
 
   return (
     <div className={styles.wrapper}>
@@ -111,6 +122,18 @@ const TodoList = () => {
         editTodo={editTodo}
         toggleComplete={toggleComplete}
       />
+      <div className={styles.deleteAllWrapper}>
+        <button
+          className={styles.deleteAllButton}
+          onClick={deleteAllTodos}
+          disabled={todos.length === 0}
+        >
+          🗑️ Удалить всё
+        </button>
+        {todos.length > 0 && (
+          <span className={styles.taskCount}>({todos.length} задач)</span>
+        )}
+      </div>
     </div>
   );
 };
