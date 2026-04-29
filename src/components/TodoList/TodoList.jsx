@@ -36,6 +36,9 @@ const TodoList = () => {
     }
     return [];
   });
+  const [sortType, setSortType] = useState('new');
+  const [filterType, setFilterType] = useState('all');
+  const [processedTodos, setProcessedTodos] = useState([]);
 
   const addTodo = (text) => {
     if (text.trim()) {
@@ -70,21 +73,67 @@ const TodoList = () => {
     setTodos(updatedTodos);
   };
 
+  const deleteAllTodos = () => {
+    if (todos.length === 0) return;
+
+    const confirmed = window.confirm(
+      'Вы уверены, что хотите удалить ВСЕ задачи? Это действие нельзя отменить.'
+    );
+    if (confirmed) {
+      setTodos([]);
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
+
+  useEffect(() => {
+    let processed = todos.filter((todo) => {
+      if (filterType === 'active') return !todo.completed;
+      if (filterType === 'completed') return todo.completed;
+      return true;
+    });
+
+    processed.sort((a, b) => {
+      if (sortType === 'new') {
+        return b.createdAt - a.createdAt;
+      } else {
+        return a.createdAt - b.createdAt;
+      }
+    });
+
+    setProcessedTodos(processed);
+  }, [todos, sortType, filterType]);
 
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
       <AddSection addTodo={addTodo} />
-      <FilterGroup />
+      <FilterGroup
+        sortType={sortType}
+        setSortType={setSortType}
+        filterType={filterType}
+        setFilterType={setFilterType}
+      />
       <TodosItems
-        todos={todos}
+        todos={processedTodos}
         deleteTodo={deleteTodo}
         editTodo={editTodo}
         toggleComplete={toggleComplete}
       />
+      <div className={styles.deleteAllWrapper}>
+        <button
+          className={styles.deleteAllButton}
+          onClick={deleteAllTodos}
+          disabled={todos.length === 0}
+        >
+          🗑️ Удалить всё
+        </button>
+        {todos.length > 0 && (
+          <span className={styles.taskCount}>({todos.length} задач)</span>
+        )}
+      </div>
     </div>
   );
 };
