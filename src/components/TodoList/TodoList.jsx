@@ -4,29 +4,10 @@ import { useEffect, useState } from 'react';
 import AddSection from '../AddSection';
 import FilterGroup from '../FilterGroup';
 import TodosItems from '../TodosItems';
+import Pagination from '../Pagination';
 import styles from './styles.module.scss';
 
-const TODOS_MOCK = [
-  { id: 1, text: 'Пример задачи 1', completed: false, createdAt: Date.now() },
-  {
-    id: 2,
-    text: 'Пример задачи 2',
-    completed: false,
-    createdAt: Date.now() + 1000,
-  },
-  {
-    id: 3,
-    text: 'Пример задачи 3',
-    completed: true,
-    createdAt: Date.now() + 2000,
-  },
-  {
-    id: 4,
-    text: 'Пример задачи 4',
-    completed: false,
-    createdAt: Date.now() + 3000,
-  },
-];
+const TODOS_PER_PAGE = 5;
 
 const TodoList = () => {
   const [todos, setTodos] = useState(() => {
@@ -39,6 +20,7 @@ const TodoList = () => {
   const [sortType, setSortType] = useState('new');
   const [filterType, setFilterType] = useState('all');
   const [processedTodos, setProcessedTodos] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const addTodo = (text) => {
     if (text.trim()) {
@@ -49,12 +31,20 @@ const TodoList = () => {
         createdAt: Date.now(),
       };
       setTodos([...todos, newTodo]);
+      setCurrentPage(1);
     }
   };
 
   const deleteTodo = (id) => {
     const filteredTodos = todos.filter((todo) => todo.id !== id);
     setTodos(filteredTodos);
+    const newPagesCount = Math.ceil(filteredTodos.length / TODOS_PER_PAGE);
+
+    if (currentPage > newPagesCount && newPagesCount > 0) {
+      setCurrentPage(newPagesCount);
+    } else if (newPagesCount === 0) {
+      setCurrentPage(1);
+    }
   };
 
   const editTodo = (id, newText) => {
@@ -81,6 +71,7 @@ const TodoList = () => {
     );
     if (confirmed) {
       setTodos([]);
+      setCurrentPage(1);
     }
   };
 
@@ -106,6 +97,16 @@ const TodoList = () => {
     setProcessedTodos(processed);
   }, [todos, sortType, filterType]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortType, filterType]);
+
+  // Получаем текущие задачи для отображения
+  const indexOfLastTodo = currentPage * TODOS_PER_PAGE;
+  const indexOfFirstTodo = indexOfLastTodo - TODOS_PER_PAGE;
+  const currentTodos = processedTodos.slice(indexOfFirstTodo, indexOfLastTodo);
+  const pagesCount = Math.ceil(processedTodos.length / TODOS_PER_PAGE);
+
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
@@ -116,12 +117,22 @@ const TodoList = () => {
         filterType={filterType}
         setFilterType={setFilterType}
       />
+
       <TodosItems
-        todos={processedTodos}
+        todos={currentTodos}
         deleteTodo={deleteTodo}
         editTodo={editTodo}
         toggleComplete={toggleComplete}
       />
+
+      <Pagination
+        currentPage={currentPage}
+        pagesCount={pagesCount}
+        onPageChange={setCurrentPage}
+        allTodosCount={processedTodos.length}
+        maxPagesToShow={5}
+      />
+
       <div className={styles.deleteAllWrapper}>
         <button
           className={styles.deleteAllButton}
