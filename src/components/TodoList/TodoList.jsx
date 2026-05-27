@@ -6,32 +6,39 @@ import FilterGroup from '../FilterGroup';
 import TodosItems from '../TodosItems';
 import Pagination from '../Pagination';
 import styles from './styles.module.scss';
+import { getTodos, addTodo } from '@/services/todoApi';
 
 const TODOS_PER_PAGE = 5;
 
 const TodoList = () => {
-  const [todos, setTodos] = useState(() => {
-    const savedTodos = localStorage.getItem('todos');
-    if (savedTodos) {
-      return JSON.parse(savedTodos);
-    }
-    return [];
-  });
+  const [todos, setTodos] = useState([]);
   const [sortType, setSortType] = useState('new');
   const [filterType, setFilterType] = useState('all');
   const [processedTodos, setProcessedTodos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const addTodo = (text) => {
-    if (text.trim()) {
-      const newTodo = {
-        id: Date.now(),
-        text: text.trim(),
-        completed: false,
-        createdAt: Date.now(),
-      };
-      setTodos([...todos, newTodo]);
-      setCurrentPage(1);
+  // Загрузка задач с сервера
+  const handleGetTodos = async () => {
+    try {
+      setLoading(true);
+      const data = await getTodos();
+      setTodos(data.rows);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddTodo = async (text) => {
+    if (!text.trim()) return;
+
+    try {
+      await addTodo(text);
+      await handleGetTodos();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -58,7 +65,7 @@ const TodoList = () => {
 
   const toggleComplete = (id) => {
     const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      todo.id === id ? { ...todo, isChecked: !todo.isChecked } : todo
     );
     setTodos(updatedTodos);
   };
@@ -76,13 +83,13 @@ const TodoList = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    handleGetTodos();
+  }, []);
 
   useEffect(() => {
     let processed = todos.filter((todo) => {
-      if (filterType === 'active') return !todo.completed;
-      if (filterType === 'completed') return todo.completed;
+      if (filterType === 'active') return !todo.isChecked;
+      if (filterType === 'completed') return todo.isChecked;
       return true;
     });
 
@@ -110,7 +117,7 @@ const TodoList = () => {
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
-      <AddSection addTodo={addTodo} />
+      <AddSection handleAddTodo={handleAddTodo} />
       <FilterGroup
         sortType={sortType}
         setSortType={setSortType}
@@ -118,6 +125,7 @@ const TodoList = () => {
         setFilterType={setFilterType}
       />
 
+      {loading && <p>Загрузка...</p>}
       <TodosItems
         todos={currentTodos}
         deleteTodo={deleteTodo}

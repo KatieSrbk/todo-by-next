@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import styles from './styles.module.scss';
 
-const AddSection = ({ addTodo }) => {
+const AddSection = ({ handleAddTodo }) => {
   const [inputValue, setInputValue] = useState('');
 
   const handleAdd = () => {
-    addTodo(inputValue);
+    handleAddTodo(inputValue);
     setInputValue('');
   };
 

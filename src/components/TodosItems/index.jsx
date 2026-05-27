@@ -73,12 +73,12 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
                   <input
                     className={styles.todoCheckbox}
                     type='checkbox'
-                    checked={item.completed}
+                    checked={item.isChecked}
                     onChange={() => toggleComplete(item.id)}
                   />
                   <span
                     className={classNames(styles.todoText, {
-                      [styles.completed]: item.completed,
+                      [styles.completed]: item.isChecked,
                     })}
                   >
                     {item.text}
