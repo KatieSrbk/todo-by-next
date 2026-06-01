@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import styles from './styles.module.scss';
 
-const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
+const TodosItems = ({ todos, handleDeleteTodo, editTodo, toggleComplete }) => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const inputRef = useRef(null);
@@ -42,9 +42,10 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
   return (
     <div className={styles.todoList}>
       {todos.map((item) => {
+        const itemId = item.uuid;
         const isEditing = editingId === item.id;
         return (
-          <div key={item.id} className={styles.todoItem}>
+          <div key={itemId} className={styles.todoItem}>
             {isEditing ? (
               <div className={styles.editWrapper}>
                 <input
@@ -74,7 +75,7 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
                     className={styles.todoCheckbox}
                     type='checkbox'
                     checked={item.isChecked}
-                    onChange={() => toggleComplete(item.id)}
+                    onChange={() => toggleComplete(itemId)}
                   />
                   <span
                     className={classNames(styles.todoText, {
@@ -93,7 +94,7 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
                   </button>
                   <button
                     className={styles.deleteButton}
-                    onClick={() => deleteTodo(item.id)}
+                    onClick={() => handleDeleteTodo(itemId)}
                   >
                     Удалить
                   </button>

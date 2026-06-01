@@ -6,7 +6,12 @@ import FilterGroup from '../FilterGroup';
 import TodosItems from '../TodosItems';
 import Pagination from '../Pagination';
 import styles from './styles.module.scss';
-import { getTodos, addTodo } from '@/services/todoApi';
+import {
+  getTodos,
+  addTodo,
+  deleteTodo,
+  deleteAllTodos,
+} from '@/services/todoApi';
 
 const TODOS_PER_PAGE = 5;
 
@@ -42,15 +47,15 @@ const TodoList = () => {
     }
   };
 
-  const deleteTodo = (id) => {
-    const filteredTodos = todos.filter((todo) => todo.id !== id);
-    setTodos(filteredTodos);
-    const newPagesCount = Math.ceil(filteredTodos.length / TODOS_PER_PAGE);
-
-    if (currentPage > newPagesCount && newPagesCount > 0) {
-      setCurrentPage(newPagesCount);
-    } else if (newPagesCount === 0) {
-      setCurrentPage(1);
+  // Удаление задачи
+  const handleDeleteTodo = async (uuid) => {
+    try {
+      await deleteTodo(uuid);
+      setTodos((prev) =>
+        prev.filter((todo) => todo.uuid !== uuid)
+      );
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -70,15 +75,19 @@ const TodoList = () => {
     setTodos(updatedTodos);
   };
 
-  const deleteAllTodos = () => {
+  const handleDeleteAllTodos = async () => {
     if (todos.length === 0) return;
 
     const confirmed = window.confirm(
       'Вы уверены, что хотите удалить ВСЕ задачи? Это действие нельзя отменить.'
     );
-    if (confirmed) {
+    if (!confirmed) return;
+
+    try {
+      await deleteAllTodos();
       setTodos([]);
-      setCurrentPage(1);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -128,7 +137,7 @@ const TodoList = () => {
       {loading && <p>Загрузка...</p>}
       <TodosItems
         todos={currentTodos}
-        deleteTodo={deleteTodo}
+        handleDeleteTodo={handleDeleteTodo}
         editTodo={editTodo}
         toggleComplete={toggleComplete}
       />
@@ -144,7 +153,7 @@ const TodoList = () => {
       <div className={styles.deleteAllWrapper}>
         <button
           className={styles.deleteAllButton}
-          onClick={deleteAllTodos}
+          onClick={handleDeleteAllTodos}
           disabled={todos.length === 0}
         >
           🗑️ Удалить всё
