@@ -11,6 +11,7 @@ import {
   addTodo,
   deleteTodo,
   deleteAllTodos,
+  updateTodo,
 } from '@/services/todoApi';
 
 const TODOS_PER_PAGE = 5;
@@ -51,26 +52,31 @@ const TodoList = () => {
   const handleDeleteTodo = async (uuid) => {
     try {
       await deleteTodo(uuid);
+      setTodos((prev) => prev.filter((todo) => todo.uuid !== uuid));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Редактирование задачи
+  const handleEditTodo = async (uuid, newText) => {
+    if (!newText.trim()) return;
+
+    try {
+      await updateTodo(uuid, { text: newText.trim() });
       setTodos((prev) =>
-        prev.filter((todo) => todo.uuid !== uuid)
+        prev.map((todo) =>
+          todo.uuid === uuid ? { ...todo, text: newText.trim() } : todo
+        )
       );
     } catch (err) {
       console.error(err);
     }
   };
 
-  const editTodo = (id, newText) => {
-    if (newText.trim()) {
-      const updatedTodos = todos.map((todo) =>
-        todo.id === id ? { ...todo, text: newText.trim() } : todo
-      );
-      setTodos(updatedTodos);
-    }
-  };
-
-  const toggleComplete = (id) => {
+  const toggleComplete = (uuid) => {
     const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, isChecked: !todo.isChecked } : todo
+      todo.uuid === uuid ? { ...todo, isChecked: !todo.isChecked } : todo
     );
     setTodos(updatedTodos);
   };
@@ -138,7 +144,7 @@ const TodoList = () => {
       <TodosItems
         todos={currentTodos}
         handleDeleteTodo={handleDeleteTodo}
-        editTodo={editTodo}
+        handleEditTodo={handleEditTodo}
         toggleComplete={toggleComplete}
       />
 

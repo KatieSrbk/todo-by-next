@@ -1,4 +1,4 @@
-const BASE_URL = 'https://back-todo-zf3r.onrender.com';
+const BASE_URL = 'http://localhost:5000';
 
 // Получение всех задач
 export const getTodos = async () => {
@@ -67,6 +67,27 @@ export const deleteAllTodos = async () => {
     }
   } catch (error) {
     console.error('deleteAllTodos error:', error);
+    throw error;
+  }
+};
+
+export const updateTodo = async (uuid, updates) => {
+  try {
+    const response = await fetch(`${BASE_URL}/task/${uuid}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updates),
+    });
+
+    if (!response.ok) {
+      throw new Error('Ошибка обновления задачи');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('updateTodo error:', error);
     throw error;
   }
 };
