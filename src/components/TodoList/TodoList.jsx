@@ -21,19 +21,15 @@ const TodoList = () => {
   const [sortType, setSortType] = useState('new');
   const [filterType, setFilterType] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
 
   // Загрузка задач с сервера (с фильтрацией и сортировкой)
   const handleGetTodos = async () => {
     try {
-      setLoading(true);
       const data = await getTodos(filterType, sortType);
       setTodos(data.rows);
       setCurrentPage(1);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -114,8 +110,6 @@ const TodoList = () => {
         filterType={filterType}
         setFilterType={setFilterType}
       />
-
-      {loading && <p>Загрузка...</p>}
       <TodosItems
         todos={currentTodos}
         handleDeleteTodo={handleDeleteTodo}
