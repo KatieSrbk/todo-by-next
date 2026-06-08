@@ -1,9 +1,24 @@
 const BASE_URL = 'http://localhost:5000';
 
-// Получение всех задач
-export const getTodos = async () => {
+// Получение всех задач с фильтрацией и сортировкой
+export const getTodos = async (filter, sortType) => {
   try {
-    const response = await fetch(`${BASE_URL}/tasks`, {
+    // Строим URL с параметрами
+    const params = new URLSearchParams();
+
+    if (filter !== 'all') {
+      params.append('filter', filter);
+    }
+
+    if (sortType) {
+      params.append('sortType', sortType);
+    }
+
+    const url = params.toString()
+      ? `${BASE_URL}/tasks?${params.toString()}`
+      : `${BASE_URL}/tasks`;
+
+    const response = await fetch(url, {
       method: 'GET',
     });
 

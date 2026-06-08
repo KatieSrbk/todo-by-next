@@ -20,16 +20,16 @@ const TodoList = () => {
   const [todos, setTodos] = useState([]);
   const [sortType, setSortType] = useState('new');
   const [filterType, setFilterType] = useState('all');
-  const [processedTodos, setProcessedTodos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // Загрузка задач с сервера
+  // Загрузка задач с сервера (с фильтрацией и сортировкой)
   const handleGetTodos = async () => {
     try {
       setLoading(true);
-      const data = await getTodos();
+      const data = await getTodos(filterType, sortType);
       setTodos(data.rows);
+      setCurrentPage(1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -48,37 +48,33 @@ const TodoList = () => {
     }
   };
 
-  // Удаление задачи
   const handleDeleteTodo = async (uuid) => {
     try {
       await deleteTodo(uuid);
-      setTodos((prev) => prev.filter((todo) => todo.uuid !== uuid));
+      await handleGetTodos();
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Редактирование задачи
   const handleEditTodo = async (uuid, newText) => {
     if (!newText.trim()) return;
 
     try {
       await updateTodo(uuid, { text: newText.trim() });
-      setTodos((prev) =>
-        prev.map((todo) =>
-          todo.uuid === uuid ? { ...todo, text: newText.trim() } : todo
-        )
-      );
+      await handleGetTodos();
     } catch (err) {
       console.error(err);
     }
   };
 
-  const toggleComplete = (uuid) => {
-    const updatedTodos = todos.map((todo) =>
-      todo.uuid === uuid ? { ...todo, isChecked: !todo.isChecked } : todo
-    );
-    setTodos(updatedTodos);
+  const handleToggleComplete = async (uuid, currentStatus) => {
+    try {
+      await updateTodo(uuid, { isChecked: !currentStatus });
+      await handleGetTodos();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDeleteAllTodos = async () => {
@@ -91,43 +87,22 @@ const TodoList = () => {
 
     try {
       await deleteAllTodos();
-      setTodos([]);
+      await handleGetTodos();
     } catch (err) {
       console.error(err);
     }
   };
 
+  // Загружаем задачи при монтировании и при изменении фильтров/сортировки
   useEffect(() => {
     handleGetTodos();
-  }, []);
+  }, [filterType, sortType]);
 
-  useEffect(() => {
-    let processed = todos.filter((todo) => {
-      if (filterType === 'active') return !todo.isChecked;
-      if (filterType === 'completed') return todo.isChecked;
-      return true;
-    });
-
-    processed.sort((a, b) => {
-      if (sortType === 'new') {
-        return b.createdAt - a.createdAt;
-      } else {
-        return a.createdAt - b.createdAt;
-      }
-    });
-
-    setProcessedTodos(processed);
-  }, [todos, sortType, filterType]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortType, filterType]);
-
-  // Получаем текущие задачи для отображения
+  // Пагинация (теперь todos уже отфильтрованы и отсортированы на бэке)
   const indexOfLastTodo = currentPage * TODOS_PER_PAGE;
   const indexOfFirstTodo = indexOfLastTodo - TODOS_PER_PAGE;
-  const currentTodos = processedTodos.slice(indexOfFirstTodo, indexOfLastTodo);
-  const pagesCount = Math.ceil(processedTodos.length / TODOS_PER_PAGE);
+  const currentTodos = todos.slice(indexOfFirstTodo, indexOfLastTodo);
+  const pagesCount = Math.ceil(todos.length / TODOS_PER_PAGE);
 
   return (
     <div className={styles.wrapper}>
@@ -145,14 +120,14 @@ const TodoList = () => {
         todos={currentTodos}
         handleDeleteTodo={handleDeleteTodo}
         handleEditTodo={handleEditTodo}
-        toggleComplete={toggleComplete}
+        toggleComplete={handleToggleComplete}
       />
 
       <Pagination
         currentPage={currentPage}
         pagesCount={pagesCount}
         onPageChange={setCurrentPage}
-        allTodosCount={processedTodos.length}
+        allTodosCount={todos.length}
         maxPagesToShow={5}
       />
 
