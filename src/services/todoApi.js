@@ -1,9 +1,8 @@
 const BASE_URL = 'http://localhost:5000';
 
 // Получение всех задач с фильтрацией и сортировкой
-export const getTodos = async (filter, sortType) => {
+export const getTodos = async (filter, sortType, page = 1, limit = 5) => {
   try {
-    // Строим URL с параметрами
     const params = new URLSearchParams();
 
     if (filter !== 'all') {
@@ -13,6 +12,10 @@ export const getTodos = async (filter, sortType) => {
     if (sortType) {
       params.append('sortType', sortType);
     }
+
+    // Добавляем параметры пагинации
+    params.append('page', page);
+    params.append('limit', limit);
 
     const url = params.toString()
       ? `${BASE_URL}/tasks?${params.toString()}`
