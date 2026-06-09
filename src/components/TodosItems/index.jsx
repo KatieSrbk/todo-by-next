@@ -2,19 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import styles from './styles.module.scss';
 
-const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
+const TodosItems = ({
+  todos,
+  handleDeleteTodo,
+  handleEditTodo,
+  toggleComplete,
+}) => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const inputRef = useRef(null);
 
   const startEditing = (todo) => {
-    setEditingId(todo.id);
+    setEditingId(todo.uuid);
     setEditText(todo.text);
   };
 
-  const saveEdit = (id) => {
+  const saveEdit = (uuid) => {
     if (editText.trim()) {
-      editTodo(id, editText);
+      handleEditTodo(uuid, editText);
       setEditingId(null);
       setEditText('');
     }
@@ -25,9 +30,9 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
     setEditText('');
   };
 
-  const handleKeyDown = (e, id) => {
+  const handleKeyDown = (e, uuid) => {
     if (e.key === 'Enter') {
-      saveEdit(id);
+      saveEdit(uuid);
     } else if (e.key === 'Escape') {
       cancelEdit();
     }
@@ -42,9 +47,10 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
   return (
     <div className={styles.todoList}>
       {todos.map((item) => {
-        const isEditing = editingId === item.id;
+        const itemId = item.uuid;
+        const isEditing = editingId === item.uuid;
         return (
-          <div key={item.id} className={styles.todoItem}>
+          <div key={itemId} className={styles.todoItem}>
             {isEditing ? (
               <div className={styles.editWrapper}>
                 <input
@@ -52,13 +58,13 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
                   type='text'
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, item.id)}
+                  onKeyDown={(e) => handleKeyDown(e, item.uuid)}
                   className={styles.editInput}
                 />
                 <div className={styles.editButtons}>
                   <button
                     className={styles.saveButton}
-                    onClick={() => saveEdit(item.id)}
+                    onClick={() => saveEdit(item.uuid)}
                   >
                     💾 Сохранить
                   </button>
@@ -73,12 +79,12 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
                   <input
                     className={styles.todoCheckbox}
                     type='checkbox'
-                    checked={item.completed}
-                    onChange={() => toggleComplete(item.id)}
+                    checked={item.isChecked}
+                    onChange={() => toggleComplete(itemId, item.isChecked)}
                   />
                   <span
                     className={classNames(styles.todoText, {
-                      [styles.completed]: item.completed,
+                      [styles.completed]: item.isChecked,
                     })}
                   >
                     {item.text}
@@ -93,7 +99,7 @@ const TodosItems = ({ todos, deleteTodo, editTodo, toggleComplete }) => {
                   </button>
                   <button
                     className={styles.deleteButton}
-                    onClick={() => deleteTodo(item.id)}
+                    onClick={() => handleDeleteTodo(itemId)}
                   >
                     Удалить
                   </button>

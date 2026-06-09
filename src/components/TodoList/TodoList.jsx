@@ -6,111 +6,112 @@ import FilterGroup from '../FilterGroup';
 import TodosItems from '../TodosItems';
 import Pagination from '../Pagination';
 import styles from './styles.module.scss';
+import {
+  getTodos,
+  addTodo,
+  deleteTodo,
+  deleteAllTodos,
+  updateTodo,
+} from '@/services/todoApi';
 
 const TODOS_PER_PAGE = 5;
 
 const TodoList = () => {
-  const [todos, setTodos] = useState(() => {
-    const savedTodos = localStorage.getItem('todos');
-    if (savedTodos) {
-      return JSON.parse(savedTodos);
-    }
-    return [];
-  });
+  const [todos, setTodos] = useState([]);
   const [sortType, setSortType] = useState('new');
   const [filterType, setFilterType] = useState('all');
-  const [processedTodos, setProcessedTodos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pagesCount, setPagesCount] = useState(1);
+  const [totalTodosCount, setTotalTodosCount] = useState(0);
 
-  const addTodo = (text) => {
-    if (text.trim()) {
-      const newTodo = {
-        id: Date.now(),
-        text: text.trim(),
-        completed: false,
-        createdAt: Date.now(),
-      };
-      setTodos([...todos, newTodo]);
-      setCurrentPage(1);
+  // Загрузка задач с сервера (с фильтрацией, сортировкой и пагинацией)
+  const handleGetTodos = async (page = currentPage) => {
+    try {
+      const data = await getTodos(filterType, sortType, page, TODOS_PER_PAGE);
+      console.log('data:::', data);
+      setTodos(data.rows);
+      setCurrentPage(data.pagination.currentPage);
+      setPagesCount(data.pagination.pagesCount);
+      setTotalTodosCount(data.pagination.totalCount);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const deleteTodo = (id) => {
-    const filteredTodos = todos.filter((todo) => todo.id !== id);
-    setTodos(filteredTodos);
-    const newPagesCount = Math.ceil(filteredTodos.length / TODOS_PER_PAGE);
+  const handleAddTodo = async (text) => {
+    if (!text.trim()) return;
 
-    if (currentPage > newPagesCount && newPagesCount > 0) {
-      setCurrentPage(newPagesCount);
-    } else if (newPagesCount === 0) {
-      setCurrentPage(1);
+    try {
+      await addTodo(text);
+      await handleGetTodos(1);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const editTodo = (id, newText) => {
-    if (newText.trim()) {
-      const updatedTodos = todos.map((todo) =>
-        todo.id === id ? { ...todo, text: newText.trim() } : todo
-      );
-      setTodos(updatedTodos);
+  const handleDeleteTodo = async (uuid) => {
+    try {
+      await deleteTodo(uuid);
+      // Проверяем, нужно ли перейти на предыдущую страницу
+      if (todos.length === 1 && currentPage > 1) {
+        await handleGetTodos(currentPage - 1);
+      } else {
+        await handleGetTodos(currentPage);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const toggleComplete = (id) => {
-    const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    );
-    setTodos(updatedTodos);
+  const handleEditTodo = async (uuid, newText) => {
+    if (!newText.trim()) return;
+
+    try {
+      await updateTodo(uuid, { text: newText.trim() });
+      await handleGetTodos(currentPage);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const deleteAllTodos = () => {
-    if (todos.length === 0) return;
+  const handleToggleComplete = async (uuid, currentStatus) => {
+    try {
+      await updateTodo(uuid, { isChecked: !currentStatus });
+      await handleGetTodos(currentPage);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteAllTodos = async () => {
+    if (totalTodosCount === 0) return;
 
     const confirmed = window.confirm(
       'Вы уверены, что хотите удалить ВСЕ задачи? Это действие нельзя отменить.'
     );
-    if (confirmed) {
-      setTodos([]);
-      setCurrentPage(1);
+    if (!confirmed) return;
+
+    try {
+      await deleteAllTodos();
+      await handleGetTodos(1);
+    } catch (err) {
+      console.error(err);
     }
   };
 
+  // Загружаем задачи при изменении фильтров, сортировки или страницы
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    handleGetTodos(currentPage);
+  }, [filterType, sortType, currentPage]);
 
-  useEffect(() => {
-    let processed = todos.filter((todo) => {
-      if (filterType === 'active') return !todo.completed;
-      if (filterType === 'completed') return todo.completed;
-      return true;
-    });
-
-    processed.sort((a, b) => {
-      if (sortType === 'new') {
-        return b.createdAt - a.createdAt;
-      } else {
-        return a.createdAt - b.createdAt;
-      }
-    });
-
-    setProcessedTodos(processed);
-  }, [todos, sortType, filterType]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortType, filterType]);
-
-  // Получаем текущие задачи для отображения
-  const indexOfLastTodo = currentPage * TODOS_PER_PAGE;
-  const indexOfFirstTodo = indexOfLastTodo - TODOS_PER_PAGE;
-  const currentTodos = processedTodos.slice(indexOfFirstTodo, indexOfLastTodo);
-  const pagesCount = Math.ceil(processedTodos.length / TODOS_PER_PAGE);
+  const handleChangePage = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Список дел</h1>
-      <AddSection addTodo={addTodo} />
+      <AddSection handleAddTodo={handleAddTodo} />
       <FilterGroup
         sortType={sortType}
         setSortType={setSortType}
@@ -119,30 +120,30 @@ const TodoList = () => {
       />
 
       <TodosItems
-        todos={currentTodos}
-        deleteTodo={deleteTodo}
-        editTodo={editTodo}
-        toggleComplete={toggleComplete}
+        todos={todos}
+        handleDeleteTodo={handleDeleteTodo}
+        handleEditTodo={handleEditTodo}
+        toggleComplete={handleToggleComplete}
       />
 
       <Pagination
         currentPage={currentPage}
         pagesCount={pagesCount}
-        onPageChange={setCurrentPage}
-        allTodosCount={processedTodos.length}
+        onPageChange={handleChangePage}
+        allTodosCount={totalTodosCount}
         maxPagesToShow={5}
       />
 
       <div className={styles.deleteAllWrapper}>
         <button
           className={styles.deleteAllButton}
-          onClick={deleteAllTodos}
-          disabled={todos.length === 0}
+          onClick={handleDeleteAllTodos}
+          disabled={totalTodosCount === 0}
         >
           🗑️ Удалить всё
         </button>
-        {todos.length > 0 && (
-          <span className={styles.taskCount}>({todos.length} задач)</span>
+        {totalTodosCount > 0 && (
+          <span className={styles.taskCount}>({totalTodosCount} задач)</span>
         )}
       </div>
     </div>
