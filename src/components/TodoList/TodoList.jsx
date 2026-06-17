@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AddSection from '../AddSection';
 import FilterGroup from '../FilterGroup';
 import TodosItems from '../TodosItems';
@@ -13,10 +14,14 @@ import {
   deleteAllTodos,
   updateTodo,
 } from '@/services/todoApi';
+import { logout, checkAuth } from '@/services/authApi';
 
 const TODOS_PER_PAGE = 5;
 
 const TodoList = () => {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [todos, setTodos] = useState([]);
   const [sortType, setSortType] = useState('new');
   const [filterType, setFilterType] = useState('all');
@@ -24,15 +29,45 @@ const TodoList = () => {
   const [pagesCount, setPagesCount] = useState(1);
   const [totalTodosCount, setTotalTodosCount] = useState(0);
 
+  // Проверка авторизации
+  useEffect(() => {
+    const checkUserAuth = async () => {
+      try {
+        const userData = await checkAuth();
+        if (!userData) {
+          router.push('/login');
+        } else {
+          setUser(userData.user);
+        }
+      } catch (error) {
+        router.push('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUserAuth();
+  }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   // Загрузка задач с сервера (с фильтрацией, сортировкой и пагинацией)
   const handleGetTodos = async (page = currentPage) => {
     try {
       const data = await getTodos(filterType, sortType, page, TODOS_PER_PAGE);
-      console.log('data:::', data);
       setTodos(data.rows);
-      setCurrentPage(data.pagination.currentPage);
-      setPagesCount(data.pagination.pagesCount);
-      setTotalTodosCount(data.pagination.totalCount);
+      setTotalTodosCount(data.totalTasksCount);
+
+      const pagesCount = Math.ceil(data.totalTasksCount / TODOS_PER_PAGE);
+      setPagesCount(pagesCount);
+      setCurrentPage(page);
     } catch (err) {
       console.error(err);
     }
@@ -43,6 +78,7 @@ const TodoList = () => {
 
     try {
       await addTodo(text);
+      setCurrentPage(1);
       await handleGetTodos(1);
     } catch (err) {
       console.error(err);
@@ -108,9 +144,23 @@ const TodoList = () => {
     setCurrentPage(newPage);
   };
 
+  if (loading) {
+    return <div className={styles.loading}>Загрузка...</div>;
+  }
+
   return (
     <div className={styles.wrapper}>
-      <h1 className={styles.title}>Список дел</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Список дел</h1>
+        <div className={styles.userInfo}>
+          <span>Привет, {user?.email}!</span>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            <span className={styles.logoutIcon}>🚪</span>
+            Выйти
+          </button>
+        </div>
+      </div>
+
       <AddSection handleAddTodo={handleAddTodo} />
       <FilterGroup
         sortType={sortType}

@@ -1,6 +1,26 @@
 const BASE_URL = 'http://localhost:5000';
 
-// Получение всех задач с фильтрацией и сортировкой
+const fetchWithAuth = async (url, options = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+    throw new Error('Unauthorized');
+  }
+
+  return response;
+};
+
+// Получение всех задач с фильтрацией, сортировкой и пагинацией
 export const getTodos = async (filter, sortType, page = 1, limit = 5) => {
   try {
     const params = new URLSearchParams();
@@ -21,7 +41,7 @@ export const getTodos = async (filter, sortType, page = 1, limit = 5) => {
       ? `${BASE_URL}/tasks?${params.toString()}`
       : `${BASE_URL}/tasks`;
 
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: 'GET',
     });
 
@@ -40,11 +60,8 @@ export const getTodos = async (filter, sortType, page = 1, limit = 5) => {
 // Добавление задачи
 export const addTodo = async (text) => {
   try {
-    const response = await fetch(`${BASE_URL}/task`, {
+    const response = await fetchWithAuth(`${BASE_URL}/task`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ text, isChecked: false }),
     });
 
@@ -62,9 +79,10 @@ export const addTodo = async (text) => {
 // Удаление одной задачи
 export const deleteTodo = async (uuid) => {
   try {
-    const response = await fetch(`${BASE_URL}/task/${uuid}`, {
+    const response = await fetchWithAuth(`${BASE_URL}/task/${uuid}`, {
       method: 'DELETE',
     });
+
     if (!response.ok) {
       throw new Error('Ошибка удаления задачи');
     }
@@ -77,9 +95,10 @@ export const deleteTodo = async (uuid) => {
 // Удаление всех задач
 export const deleteAllTodos = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/tasks`, {
+    const response = await fetchWithAuth(`${BASE_URL}/tasks`, {
       method: 'DELETE',
     });
+
     if (!response.ok) {
       throw new Error('Ошибка удаления всех задач');
     }
@@ -89,13 +108,11 @@ export const deleteAllTodos = async () => {
   }
 };
 
+// Обновление задачи (редактирование текста или статуса)
 export const updateTodo = async (uuid, updates) => {
   try {
-    const response = await fetch(`${BASE_URL}/task/${uuid}`, {
+    const response = await fetchWithAuth(`${BASE_URL}/task/${uuid}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(updates),
     });
 

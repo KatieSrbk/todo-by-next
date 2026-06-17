@@ -7,6 +7,8 @@
 
   --color-white-rgb: #{HexToRGB(#ffffff)};
   --color-white: #ffffff;
+  --color-white-border: #ddd;
+  --color-white-error-bg: #fff5f5;
 
   --color-red-rgb: #{HexToRGB(#c80000)};
 
@@ -32,6 +34,7 @@
   --color-blue-60: #667eea;
   --color-blue-50: #007bff;
   --color-blue-40: #0056b3;
+  --color-purple-10: #764ba2;
 
   // Transition durations
   --transition-duration: 0.2s;
