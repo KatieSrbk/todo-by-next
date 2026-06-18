@@ -28,11 +28,12 @@ const TodoList = () => {
   const handleGetTodos = async (page = currentPage) => {
     try {
       const data = await getTodos(filterType, sortType, page, TODOS_PER_PAGE);
-      console.log('data:::', data);
       setTodos(data.rows);
-      setCurrentPage(data.pagination.currentPage);
-      setPagesCount(data.pagination.pagesCount);
-      setTotalTodosCount(data.pagination.totalCount);
+      setTotalTodosCount(data.totalTasksCount);
+
+      const pagesCount = Math.ceil(data.totalTasksCount / TODOS_PER_PAGE);
+      setPagesCount(pagesCount);
+      setCurrentPage(page);
     } catch (err) {
       console.error(err);
     }
